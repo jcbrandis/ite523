@@ -1,0 +1,77 @@
+version: "3"
+
+services:
+  vote:
+    build: ./vote
+    ## JB.Note > We are building an image, from the dockerfile in the subfolder vote/dockerfile
+    command: python app.py
+    volumes:
+     - ./vote:/app
+    ## JB.Note >  We are creating a named volume, which is subfolder vote mapped to containter volume /app
+    ports:
+      - "5000:80"
+    ## JB.Note >  we map -p 5000 to 80 on the container
+    networks:
+      - front-tier
+      - back-tier
+    ## JB.Note >  We have two networks, a front and a back which I will show via inspect
+
+  result:
+    build: ./result
+    ## JB.Note > We are building an image, from the dockerfile in the subfolder result/dockerfile
+    command: nodemon --inspect server.js
+    volumes:
+      - ./result:/app
+    ## JB.Note >  We are creating a named volume, which is subfolder result mapped to containter volume /app
+    ports:
+      - "5001:80"
+    ## JB.Note >  we map -p 5001 to 80 on the container
+    networks:
+      - front-tier
+      - back-tier
+    ## JB.Note >  We have two networks, a front and a back which I will show via inspect
+    env_file:
+      - '.env'
+    ## JB.Note >  using a communal or project wide environment file, just called dot env (.env)
+
+  worker:
+    build: ./worker
+    ## JB.Note > We are building an image, from the dockerfile in the subfolder worker/dockerfile
+    networks:
+      - back-tier
+    ## JB.Note >  Single backend network, as nothing is directly exposed
+    env_file:
+      - '.env'
+    ## JB.Note >  using a communal or project wide environment file, just called dot env (.env)
+
+  redis:
+    image: 'redis:5.0.7-alpine'
+    ## JB.Note > We pulling down an official redis alpine image from dockerhub
+    ports: ["6379"]
+    ## JB.Note > Here we user an over-rule argument to the port 6379, however its 6379 by default anyways..
+    networks:
+      - back-tier
+    ## JB.Note >  Single backend network,
+
+  db:
+    image: postgres:9.4
+    ## JB.Note > We pulling down an official postgres version 9.4 image from dockerhub
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+    ## JB.Note >  We are creating a named volume, which is defined in volumes mapping to /var/lib/postgresql/data
+    networks:
+      - back-tier
+    ## JB.Note >  Single backend network,
+    env_file:
+      - '.env'
+    ## JB.Note >  using a communal or project wide environment file, just called dot env (.env)
+
+volumes:
+  db-data:
+  ## JB.Note >  this is a named volume, we referenced this persistent volume in the service DB
+
+networks:
+  front-tier:
+  back-tier:
+    ## JB.Note >  Network definitions, which are auto-magically now defined by docker, including DNS
+    ##            registrations, subnet, IP Assignment
