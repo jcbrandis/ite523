@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  smokeping:
+    image: ghcr.io/linuxserver/smokeping
+    env_file:
+      - 'smokeping.env'
+    ports:
+      - '80:80'
+    volumes:
+      - '/Users/jbrandis/automation/docker/ite523/smokeping/config:/config'
+      - '/Users/jbrandis/automation/docker/ite523/smokeping/data:/data'

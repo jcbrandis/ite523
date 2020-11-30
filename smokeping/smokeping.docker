@@ -1,0 +1,10 @@
+docker run -d \
+  --name=smokeping \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Australia/Sydney \
+  -p 80:80 \
+  -v /Users/jbrandis/automation/docker/smokeping/config:/config \
+  -v /Users/jbrandis/automation/docker/smokeping/data:/data \
+  --restart unless-stopped \
+  ghcr.io/linuxserver/smokeping
